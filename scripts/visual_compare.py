@@ -71,9 +71,11 @@ def calculate_perceptual_diff(
     # Count differing pixels
     diff_pixels = 0
     hist = mask.histogram()
-    # hist has [count_0, count_255]
-    if len(hist) >= 2:
-        diff_pixels = hist[1]
+    # In Pillow, mask values are 0 and 255 across a 256-element histogram
+    if len(hist) >= 256:
+        diff_pixels = hist[255]
+    elif len(hist) >= 2:
+        diff_pixels = hist[-1]
 
     diff_ratio = diff_pixels / total_pixels if total_pixels > 0 else 0.0
     similarity_score = max(0.0, min(100.0, (1.0 - diff_ratio) * 100.0))

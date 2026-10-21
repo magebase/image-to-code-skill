@@ -55,8 +55,18 @@ def capture_screenshot(
 
     width, height = viewport
 
+    # Auto-detect available chromium executable
+    exec_path = None
+    for candidate in ["/usr/bin/google-chrome", "/usr/bin/chromium", "/usr/bin/chromium-browser"]:
+        if Path(candidate).exists() and os.access(candidate, os.X_OK):
+            exec_path = candidate
+            break
+
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        launch_kwargs = {"headless": True}
+        if exec_path:
+            launch_kwargs["executable_path"] = exec_path
+        browser = p.chromium.launch(**launch_kwargs)
         context = browser.new_context(
             viewport={"width": width, "height": height},
             device_scale_factor=device_scale_factor,
