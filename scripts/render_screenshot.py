@@ -39,8 +39,14 @@ def capture_screenshot(
     out_file.parent.mkdir(parents=True, exist_ok=True)
 
     # Normalize source URL
-    if source.startswith("http://") or source.startswith("https://"):
+    if source.startswith("http://") or source.startswith("https://") or source.startswith("file://"):
         target_url = source
+    elif "?" in source:
+        file_part, query_part = source.split("?", 1)
+        abs_source = Path(file_part).resolve()
+        if not abs_source.exists():
+            raise FileNotFoundError(f"Source file not found: {abs_source}")
+        target_url = f"file://{abs_source}?{query_part}"
     else:
         abs_source = Path(source).resolve()
         if not abs_source.exists():
